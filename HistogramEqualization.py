@@ -25,6 +25,8 @@ class App(QMainWindow):
         self.inputImage = 0
         self.targetImageDirectory = ''
         self.targetImage = 0
+        self.inputLoaded = False  #Control flags which image is loaded or not
+        self.targetLoaded = False #Control flags which image is loaded or not
         self.initUI() #Initialize the UI
 
     def openInputImage(self):
@@ -44,6 +46,9 @@ class App(QMainWindow):
         inputBoxV.addWidget(inputLabel) #add image to the VBox
         inputBoxV.addWidget(input_canvas) #add plot to the VBox
         self.inputBox.setLayout(inputBoxV) # add to the inputBox which is declared in initUI
+        self.inputLoaded = True #inputImage is loaded, turns the flag True
+
+
     def openTargetImage(self):
         #SAME CODE ACTUALLY WITH THE openInputImage
         self.targetImageDirectory = QFileDialog.getOpenFileName()[0]
@@ -60,6 +65,8 @@ class App(QMainWindow):
         targetBoxV.addWidget(targetLabel)
         targetBoxV.addWidget(target_canvas)
         self.targetBox.setLayout(targetBoxV)
+        self.targetLoaded = True #targetImage is loaded, turns the flag True
+        
     def initUI(self):
         
         
@@ -114,15 +121,60 @@ class App(QMainWindow):
 
     def histogramButtonClicked(self):
         if not self.inputLoaded and not self.targetLoaded:
+            QMessageBox.warning(self, 'Error', "First load input and target images")
             # Error: "First load input and target images" in MessageBox
             return NotImplementedError
         if not self.inputLoaded:
+            QMessageBox.warning(self, 'Error', "Load input image")
             # Error: "Load input image" in MessageBox
             return NotImplementedError
         elif not self.targetLoaded:
+            QMessageBox.warning(self, 'Error', "Load target image")
             # Error: "Load target image" in MessageBox
             return NotImplementedError
+        else:
+            inputCDF = self.calcCDF(self.inputImage)
+            targetCDF = self.calcCDF(self.targetImage)
+            LUT = self.calcLUT(inputCDF, targetCDF)
+            self.resultImage = self.histMatchWithLUT(LUT)
+            
+            self.resultHist = self.calcHistogram(self.resultImage)
+            result_canvas = self.plotHistogram(self.resultHist)
+            
+            resultLabel = QLabel(self)
+            pixmap = QPixmap('./resultImage.png')
+            resultLabel.setPixmap(pixmap)
+            
+            resultBoxV = QVBoxLayout()
+            resultBoxV.addWidget(resultLabel)
+            resultBoxV.addWidget(result_canvas)
+            self.resultBox.setLayout(resultBoxV)
         
+    
+    def histMatchWithLUT(self, LUT):
+        b,g,r = cv2.split(self.inputImage) #split image to the color channels
+        height, width, channels = self.inputImage.shape #find the height and width of the image
+        
+         #create empty array for color channel used np.uint8 for image merge
+        resultB = np.zeros((height,width), dtype=np.uint8)
+        resultG = np.zeros((height,width), dtype=np.uint8)
+        resultR = np.zeros((height,width), dtype=np.uint8)
+        
+        #iterate between all pixels in the image
+        for i in range(0,height):
+            for j in range(0, width):
+                resultB[i][j]=LUT[0][b[i][j]]
+                resultG[i][j]=LUT[1][g[i][j]]
+                resultR[i][j]=LUT[2][r[i][j]]       
+        
+        #merge the three channels and create new result image
+        img = cv2.merge((resultB, resultG, resultR))
+        #save the image file to the folder
+        cv2.imwrite('resultImage.png', img)
+        #and return the img
+        return img
+        
+    
     def calcLUT(self, ICDF, TCDF): #takes inputCDF and targetCDF as parameters
         LUT = np.zeros((3,256))
         
