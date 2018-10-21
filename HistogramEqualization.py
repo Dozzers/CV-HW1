@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 
-
 ##########################################
 ## Do not forget to delete "return NotImplementedError"
 ## while implementing a function
@@ -20,10 +19,10 @@ import cv2
 class App(QMainWindow):
     def __init__(self):
         super(App, self).__init__()
-#        return NotImplementedError
+        return NotImplementedError
+
+
         self.title = 'Histogram Equalization'
-        self.setGeometry(10,10,1280,720)
-        self.setWindowTitle(self.title)
         # You can define other things in here
         self.initUI()
 
@@ -36,8 +35,9 @@ class App(QMainWindow):
         return NotImplementedError
 
     def initUI(self):
-#        return NotImplementedError
+        return NotImplementedError
         # Write GUI initialization code
+
         self.show()
 
     def histogramButtonClicked(self):
