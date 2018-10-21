@@ -1,3 +1,6 @@
+#Mutluhan Üzmez
+#150140133
+#Same libraries used with the given template.py on Ninova
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QHBoxLayout, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, \
     QPushButton, QGroupBox, QAction, QFileDialog
