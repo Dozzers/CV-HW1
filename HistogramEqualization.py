@@ -21,16 +21,36 @@ class App(QMainWindow):
         self.top = 10
         self.width = 1280 #Default width
         self.height = 720 #Default hheight
+        self.inputImageDirectory = ''
+        self.inputImage = 0
+        self.targetImageDirectory = ''
+        self.targetImage = 0
         self.initUI() #Initialize the UI
 
     def openInputImage(self):
         # This function is called when the user clicks File->Input Image.
         return NotImplementedError
 
+        self.inputImageDirectory = QFileDialog.getOpenFileName()[0] #find file directory
+        self.inputImage = cv2.imread(self.inputImageDirectory, 1) #read the image
+        inputLabel = QLabel(self)   #the only way I could find to display image in PyQt5 easily
+        pixmap = QPixmap(self.inputImageDirectory)
+        inputLabel.setPixmap(pixmap)
+        inputBoxV = QVBoxLayout()
+        inputBoxV.addWidget(inputLabel) #add image to the VBox
+        self.inputBox.setLayout(inputBoxV) # add to the inputBox which is declared in initUI
     def openTargetImage(self):
         # This function is called when the user clicks File->Target Image.
-        return NotImplementedError
+        self.targetImageDirectory = QFileDialog.getOpenFileName()[0]
+        self.targetImage = cv2.imread(self.targetImageDirectory, 1)
 
+        targetLabel = QLabel(self)
+        pixmap = QPixmap(self.targetImageDirectory)
+        targetLabel.setPixmap(pixmap)
+        
+        targetBoxV = QVBoxLayout()
+        targetBoxV.addWidget(targetLabel)
+        self.targetBox.setLayout(targetBoxV)
     def initUI(self):
         
         
