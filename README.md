@@ -1,7 +1,11 @@
 # CV-HW1
 Computer Vision - Homework 1 - Start(16.10.2018)
 
-### Histogram Equalization
+<h1 align="center">
+  <img src="./screen.png"/><br>
+  Histogram Equalization
+</h1>
+
 
 This is an image processing application which is developed with 
 * PyQt5
