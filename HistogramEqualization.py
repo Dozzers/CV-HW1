@@ -122,6 +122,48 @@ class App(QMainWindow):
         elif not self.targetLoaded:
             # Error: "Load target image" in MessageBox
             return NotImplementedError
+        
+        
+    def calcCDF(self, I):
+        height, width, channels = I.shape
+        totalSize = (width*height) #total pixel number of the image
+        
+        histI = self.calcHistogram(I) #calculate the histogram image in order to use this function modular
+        
+        blueHist = np.zeros((1,256))
+        blueHist[0][:] = histI[0]
+        
+        greenHist = np.zeros((1,256))
+        greenHist[0][:] = histI[1]
+        
+        redHist = np.zeros((1,256))
+        redHist[0][:] = histI[2]
+        
+        blueCDF = np.zeros((1,256))
+        greenCDF = np.zeros((1,256))
+        redCDF = np.zeros((1,256))
+        CDF = np.zeros((3,256))
+        
+        #all the intensity values summed up with divided by total pixel number
+        for i in range(0,256):
+            if i == 0: #if the index is 0 nothing to sum with before
+                blueCDF[0][i] = blueHist[0][i]/totalSize
+                greenCDF[0][i] = greenHist[0][i]/totalSize
+                redCDF[0][i] = redHist[0][i]/totalSize
+            else: #sum with last CDF index value and at the index value divided by total pixel number 
+                blueCDF[0][i] = blueCDF[0][i-1]+(blueHist[0][i]/totalSize)
+                greenCDF[0][i] = greenCDF[0][i-1]+(greenHist[0][i]/totalSize)
+                redCDF[0][i] = redCDF[0][i-1]+(redHist[0][i]/totalSize)
+        
+      
+        CDF[0][:] =blueCDF[0][:]
+        CDF[1][:] =greenCDF[0][:]
+        CDF[2][:] =redCDF[0][:]
+        
+        #three channel CDF obtained and returned  
+        return CDF
+        
+        
 
     def calcHistogram(self, I):
         b,g,r = cv2.split(I) #split the rgb channels of image
