@@ -28,28 +28,37 @@ class App(QMainWindow):
         self.initUI() #Initialize the UI
 
     def openInputImage(self):
-        # This function is called when the user clicks File->Input Image.
-        return NotImplementedError
 
         self.inputImageDirectory = QFileDialog.getOpenFileName()[0] #find file directory
         self.inputImage = cv2.imread(self.inputImageDirectory, 1) #read the image
+        
+        self.inputHist = self.calcHistogram(self.inputImage) #calculate and return RGB histogram
+        input_canvas = self.plotHistogram(self.inputHist) #plot the histogram and return it
+        
+
         inputLabel = QLabel(self)   #the only way I could find to display image in PyQt5 easily
         pixmap = QPixmap(self.inputImageDirectory)
         inputLabel.setPixmap(pixmap)
+        
         inputBoxV = QVBoxLayout()
         inputBoxV.addWidget(inputLabel) #add image to the VBox
+        inputBoxV.addWidget(input_canvas) #add plot to the VBox
         self.inputBox.setLayout(inputBoxV) # add to the inputBox which is declared in initUI
     def openTargetImage(self):
-        # This function is called when the user clicks File->Target Image.
+        #SAME CODE ACTUALLY WITH THE openInputImage
         self.targetImageDirectory = QFileDialog.getOpenFileName()[0]
         self.targetImage = cv2.imread(self.targetImageDirectory, 1)
-
+        
+        self.targetHist = self.calcHistogram(self.targetImage)
+        target_canvas = self.plotHistogram(self.targetHist)
+        
         targetLabel = QLabel(self)
         pixmap = QPixmap(self.targetImageDirectory)
         targetLabel.setPixmap(pixmap)
         
         targetBoxV = QVBoxLayout()
         targetBoxV.addWidget(targetLabel)
+        targetBoxV.addWidget(target_canvas)
         self.targetBox.setLayout(targetBoxV)
     def initUI(self):
         
@@ -115,23 +124,44 @@ class App(QMainWindow):
             return NotImplementedError
 
     def calcHistogram(self, I):
-        # Calculate histogram
-        return NotImplementedError
-
-class PlotCanvas(FigureCanvas):
-    def __init__(self, hist, parent=None, width=5, height=4, dpi=100):
-        return NotImplementedError
-        # Init Canvas
-        self.plotHistogram(hist)
-
+        b,g,r = cv2.split(I) #split the rgb channels of image
+        height, width, channels = I.shape #find the height and width of image
+        
+        channelHist = np.zeros((3,256)) #create an empty array
+        
+        for i in range(0,height): #to navigate between all pixels go all columns
+            for j in range(0, width): # and all rows
+                #increment the histogram value between (0-255) corresponding color channel value of that pixel
+                channelHist[0][b[i][j]]+=1  #blue
+                channelHist[1][g[i][j]]+=1  #green
+                channelHist[2][r[i][j]]+=1  #red
+            
+        return channelHist
+    
     def plotHistogram(self, hist):
-        return NotImplementedError
-        # Plot histogram
+        canvas = FigureCanvas(Figure(figsize=(5, 3))) #canvas created to return drawable image by PyQt
+        
+        ax = canvas.figure.subplots(3, sharex=True, sharey=True) #Divided to the three subplot
 
-        self.draw()
+        blueHist = np.zeros((1,256)) #To iterate all intensity values this change has been made
+        blueHist[0][:] = hist[0]
+        
+        greenHist = np.zeros((1,256)) #To iterate all intensity values this change has been made
+        greenHist[0][:] = hist[1]
+        
+        redHist = np.zeros((1,256)) #To iterate all intensity values this change has been made
+        redHist[0][:] = hist[2]
+        
+        #Intensity values plotted as bar with the corresponding channel color
+        ax[0].bar(range(0,256), redHist[0,:], color='red')
+        ax[1].bar(range(0,256), greenHist[0,:], color='green') 
+        ax[2].bar(range(0,256), blueHist[0,:], color='blue')
+        
+        return canvas #canvas returned
 
-
+#It starts the qtApp
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = App()
     sys.exit(app.exec_())
+
