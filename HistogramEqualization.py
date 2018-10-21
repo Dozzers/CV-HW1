@@ -123,7 +123,21 @@ class App(QMainWindow):
             # Error: "Load target image" in MessageBox
             return NotImplementedError
         
+    def calcLUT(self, ICDF, TCDF): #takes inputCDF and targetCDF as parameters
+        LUT = np.zeros((3,256))
         
+        for x in range(0,3): #iterate for all 3 channels
+            for gi in range(256): #iterate for all intensity index of input image
+                gj=0
+                #if targetCDF is smaller than inputCDF increment the target index until not
+                while TCDF[x][gj]<ICDF[x][gi] and gj<255: 
+                    gj = gj+1
+                
+                #and assign the gj index to the LUT table corresponding to gi index
+                LUT[x][gi]=gj
+        #return look-up table
+        return LUT
+
     def calcCDF(self, I):
         height, width, channels = I.shape
         totalSize = (width*height) #total pixel number of the image
