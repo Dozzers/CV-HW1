@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, \
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QHBoxLayout, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, \
     QPushButton, QGroupBox, QAction, QFileDialog
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PyQt5.QtWidgets import QGridLayout
@@ -11,20 +11,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 
-##########################################
-## Do not forget to delete "return NotImplementedError"
-## while implementing a function
-########################################
+
 
 class App(QMainWindow):
     def __init__(self):
         super(App, self).__init__()
-        return NotImplementedError
-
-
         self.title = 'Histogram Equalization'
-        # You can define other things in here
-        self.initUI()
+        self.left = 10
+        self.top = 10
+        self.width = 1280 #Default width
+        self.height = 720 #Default hheight
+        self.initUI() #Initialize the UI
 
     def openInputImage(self):
         # This function is called when the user clicks File->Input Image.
@@ -35,9 +32,55 @@ class App(QMainWindow):
         return NotImplementedError
 
     def initUI(self):
-        return NotImplementedError
-        # Write GUI initialization code
+        
+        
+        self.setGeometry(self.left,self.top,self.width,self.height)
+        self.setWindowTitle(self.title)
+        
+        actionOpenInput = QAction(" Open Input", self)
+        actionOpenInput.setStatusTip('Chose an image from files for input')
+        actionOpenInput.triggered.connect(self.openInputImage)
+        
+        actionOpenTarget = QAction(" Open Target", self)
+        actionOpenTarget.setStatusTip('Chose an image from files for target')
+        actionOpenTarget.triggered.connect(self.openTargetImage)
+        
+        actionExit = QAction(" Exit", self)
+        actionExit.setStatusTip('Close the application')
+        actionExit.triggered.connect(self.close)
+        
+        self.statusBar()
+        
+        
+        mainMenu = self.menuBar() #Top menu bar for file operations
+        fileMenu = mainMenu.addMenu('&File')
+        fileMenu.addAction(actionOpenInput)
+        fileMenu.addAction(actionOpenTarget)
+        fileMenu.addAction(actionExit)
+        
+        buttonEqualizeHistogram = QAction('Equalize Histogram', self)
+        buttonEqualizeHistogram.setToolTip('runs the function')
+        buttonEqualizeHistogram.triggered.connect(self.histogramButtonClicked)
+        
+        toolbar = self.addToolBar('Tools') #Toolbar for equalize histogram button
+        toolbar.addAction(buttonEqualizeHistogram)
+        
+        self.centralWidget = QWidget()
+        self.setCentralWidget(self.centralWidget)
+        self.mainB  = QHBoxLayout()
+        
+        self.inputBox = QGroupBox("Input") #Groupboxes to display image and histogram
 
+        self.targetBox = QGroupBox("Target")
+
+        self.resultBox = QGroupBox("Result")
+
+        
+        self.mainB.addWidget(self.inputBox)
+        self.mainB.addWidget(self.targetBox)
+        self.mainB.addWidget(self.resultBox)
+        self.centralWidget.setLayout(self.mainB)
+        
         self.show()
 
     def histogramButtonClicked(self):
